@@ -1,0 +1,18 @@
+<resources>
+    <style name="Base.Theme.Tarea1" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="colorPrimary">@color/mi_magenta</item>
+
+        <item name="colorPrimaryVariant">@color/mi_magenta_oscuro</item>
+
+        <item name="colorOnPrimary">@color/mi_magenta_on_color</item>
+
+        <item name="colorSecondary">@color/mi_magenta</item>
+        <item name="colorOnSecondary">@color/mi_magenta_on_color</item>
+
+        <item name="android:colorBackground">@color/white</item>
+
+    </style>
+
+    <style name="Theme.Tarea1" parent="Base.Theme.Tarea1" />
+</resources>

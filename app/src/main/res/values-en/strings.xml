@@ -1,0 +1,22 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:ignore="Typos">Task1</string>
+    <!-- : Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="label_usuario">User</string>
+    <string name="label_contrasena">Password</string>
+    <string name="btn_iniciar_sesion">Login</string>
+    <string name="btn_google_login">Login using Google Account</string>
+    <string name="link_crear_cuenta">Don\'t have an account yet? Register NOW!</string>
+    <string name="mensaje_funcionalidad_no_implementada">Functionality not implemented (yet)</string>
+    <string name="btn_cerrar_snackbar">CLOSE</string>
+    <string name="snackbar_not_implemented">not implemented</string>
+    <string name="snackbar_action_close">close</string>
+    <string name="label_confirmar_contrasena">Confirm password</string>
+    <string name="label_fecha_nacimiento">Birth Date</string>
+    <string name="btn_crear_cuenta">Create Account</string>
+    <string name="error_contrasenas_no_coinciden">Passwords don\'t match</string>
+    <string name="error_campo_obligatorio">Mandatory field</string>
+    <string name="error_contrasena_minima">Password must be at least 4 characters</string>
+    <string name='mensaje_login_exitoso'>Login is Valid. ¡Welcome, admin!</string>
+    <string name='mensaje_credenciales_incorrectas'>Invalid Credentials</string>
+</resources>
