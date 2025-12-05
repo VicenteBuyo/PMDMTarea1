@@ -154,40 +154,48 @@ class LoginFragment : Fragment() {
     // ----------------------------------------------------------------------
 
     private fun setupViewModelObservers() {
+        // Configurar los OBSERVERS (Observadores de LiveData).
+        // La VISTA (Fragment) reacciona automáticamente a los cambios en el VIEWMODEL.
 
-        // OBSERVACIÓN 1: Estado del Botón
-        // 'observe(viewLifecycleOwner)': Suscribe el Fragmento a los cambios de LiveData.
-        // viewLifecycleOwner garantiza que la observación solo ocurre mientras la vista del Fragment esté activa.
+        // Observamos el LiveData que me dice si el botón de login debe estar activo o no.
         authViewModel.isLoginButtonEnabled.observe(viewLifecycleOwner) { isEnabled ->
-            // Actualiza 'isEnabled' del botón a true cuando el authviewmodel determina que
-            // tanto usuario como contraseña tienen contenido
+            // Si el ViewModel me dice 'true', activo el botón; si me dice 'false', lo deshabilito.
+            // Esto previene que el usuario pulse login si faltan credenciales (ej: un campo vacío).
             binding.btnLogin.isEnabled = isEnabled
         }
 
-        // OBSERVACIÓN 2: Resultado del Login
-        // Se activa si el usuario pulsa Iniciar sesión y el authViewModel.performLogin() ha
-        // verificado las credenciales
-        // Pasamos viewLifecycleOwner como parámetro para que la observación se detenga cuando
-        // la vista del Fragment se destruye, para evitar fugas de memoria
+        // Observo el resultado final de la validación del login que el ViewModel me da.
+        // El resultado es un booleano (true para éxito, false para error).
         authViewModel.loginResult.observe(viewLifecycleOwner) { isSuccess ->
+            // Si el valor es null, salimos
             if (isSuccess == null) return@observe
 
-            if (isSuccess) { // Si el boolean es true...
-                // Muestra un mensaje
+            if (isSuccess) { // Si el boolean es true (Login Exitoso)...
+
+                // Muestra un mensaje de éxito.
                 Toast.makeText(
                     context,
                     getString(R.string.mensaje_login_exitoso),
                     Toast.LENGTH_SHORT
                 ).show()
-            } else { // Si el boolean arroja false...
-                // Muestra un mensaje de error
+
+                // NUEVO:
+                // Usamos el 'findNavController()' para obtener el controlador de navegación.
+                // Uso el ID de la acción que definí en mi archivo de navegación (nav_graph.xml).
+                // Esto lleva del LoginFragment al TabFragment, iniciando la siguiente pantalla.
+                findNavController().navigate(R.id.action_login_to_tabFragment)
+
+            } else { // Si el boolean arroja false (Login Fallido)...
+
+                // Muestra un mensaje de error más largo para que el usuario lo vea bien.
                 Toast.makeText(
                     context,
                     getString(R.string.mensaje_credenciales_incorrectas),
                     Toast.LENGTH_LONG
                 ).show()
 
-                // limpiamos los campos
+                // Lógica de limpieza: Borramos lo que haya escrito en los campos para obligar
+                // al usuario a intentarlo de nuevo.
                 binding.etUsername.text?.clear()
                 binding.etPassword.text?.clear()
             }

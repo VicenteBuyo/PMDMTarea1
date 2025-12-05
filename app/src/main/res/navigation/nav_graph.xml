@@ -1,30 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<!-- Archivo de grafo de navegación del componente Navigation -->
-<!-- Define los destinos posibles de la app y las rutas (actions) para moverse entre ellos -->
-<!-- Simplifica la gestión de la pila de retroceso -->
-<!-- Requisito de la tarea (usar componente Navigation) -->
-
-<!-- No declaramos Activity en el Navigation porque tenemos Single Activity Architecture -->
-<!-- y por tanto NO cambiaremos entre diferentes Activities -->
-<!-- En su lugar, definimos la MainActivity en AndroidManifest.xml como entrada principal -->
-
-<!-- Definición global -->
 <navigation
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph.xml"
+    android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
-    <!-- startDestination = le dice a NavHostFragment (en MainActivity.kt) el fragmento a cargar por defecto -->
-
 
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.tarea1.fragments.LoginFragment"
-        android:label="login"
-        tools:layout="@layout/fragment_login" >
-        <!-- Acción de navegación: Ruta que sigue con el botón de Crear una cuenta-->
+        android:label="@string/btn_iniciar_sesion" tools:layout="@layout/fragment_login" >
+
+        <action
+            android:id="@+id/action_login_to_tabFragment"
+            app:destination="@id/tabFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"/>
+
         <action
             android:id="@+id/action_login_to_register"
             app:destination="@id/registerFragment" />
@@ -33,18 +25,24 @@
     <fragment
         android:id="@+id/registerFragment"
         android:name="com.example.tarea1.fragments.RegisterFragment"
-        android:label="register"
-        tools:layout="@layout/fragment_register" >
-        <!-- Acción de retorno: Ruta que sigue con el botón de Crear cuenta -->
+        android:label="@string/btn_crear_cuenta" tools:layout="@layout/fragment_register" >
+
+        <action
+            android:id="@+id/action_register_to_tabFragment"
+            app:destination="@id/tabFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"/>
+
         <action
             android:id="@+id/action_register_to_login"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true"/>
-        <!-- popUpTo = quita de la pila los fragments hasta el LoginFragment -->
-        <!-- popUpToInclusive = quita también el fragment antiguo LoginFragment si lo había -->
-
-
     </fragment>
+
+    <fragment
+        android:id="@+id/tabFragment"
+        android:name="com.example.tarea1.fragments.TabFragment"
+        android:label="@string/title_tabs" tools:layout="@layout/fragment_tab" />
 
 </navigation>

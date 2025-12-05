@@ -20,4 +20,9 @@
     <string name="error_contrasena_minima">La contraseña debe tener al menos 4 caracteres</string>
     <string name='mensaje_login_exitoso'>Login Correcto. ¡Bienvenido, admin!</string>
     <string name='mensaje_credenciales_incorrectas'>Credenciales Incorrectas</string>
+    <string name="title_tabs">Teclados y Favoritos</string>
+    <string name="title_list">Lista de Teclados</string>
+    <string name="title_favs">Favoritos</string>
+    <string name="placeholder_keyboard_name">Nombre del Teclado</string>
+    <string name="placeholder_keyboard_description">Descripción del teclado mecánico. Los teclados mecánicos normalmente tienen un montón de cosas pero lo importante es reconocer qué es lo que tienen los teclados mecánicos. Es usual encontrar que todos tienen switches, estabilizadores, keycaps y sobre todo una buena case.</string>
 </resources>

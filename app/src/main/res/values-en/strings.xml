@@ -19,4 +19,9 @@
     <string name="error_contrasena_minima">Password must be at least 4 characters</string>
     <string name='mensaje_login_exitoso'>Login is Valid. ¡Welcome, admin!</string>
     <string name='mensaje_credenciales_incorrectas'>Invalid Credentials</string>
+    <string name="title_tabs">Keyboards and Favorites</string>
+    <string name="title_list">Keyboards list</string>
+    <string name="title_favs">Favorites</string>
+    <string name="placeholder_keyboard_name">Keyboard Name</string>
+    <string name="placeholder_keyboard_description">Description of a mechanical keyboard. Mechanical keyboards typically have many features, but the important thing is to recognize what they include. They usually all have switches, stabilizers, keycaps, and, above all, a good case.</string>
 </resources>
