@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.tarea1.databinding.ActivityMainBinding
 
 
+
 // Punto de entrada de la aplicación (Single Activity Architecture)
 // Inicializa el entorno y carga el contenedor que gestiona la navegación (NavHostFragment)
 class MainActivity : AppCompatActivity() {

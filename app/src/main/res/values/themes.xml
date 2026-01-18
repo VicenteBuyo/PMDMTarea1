@@ -10,6 +10,7 @@
         <item name="android:colorBackground">@color/white</item>
     </style>
 
+
     <style name="Theme.Tarea1" parent="Base.Theme.Tarea1" />
 
 
