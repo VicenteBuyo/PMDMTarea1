@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 @Suppress("SuspiciousIndentation")
 
 
+
+
 //Archivo de arquitectura de construcción de Gradle para el proyecto
 //Configuramos características y librerias que usaremos en él
 
@@ -86,4 +88,6 @@ dependencies {
     // Permite usar 'by viewModels()' - código simplificado
     // Requisito de la tarea
     implementation("androidx.fragment:fragment-ktx:1.8.9")
+    // Componente Splashscreen
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

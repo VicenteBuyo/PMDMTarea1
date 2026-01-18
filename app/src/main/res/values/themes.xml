@@ -1,18 +1,26 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="Base.Theme.Tarea1" parent="Theme.Material3.DayNight.NoActionBar">
-
         <item name="colorPrimary">@color/mi_magenta</item>
-
         <item name="colorPrimaryVariant">@color/mi_magenta_oscuro</item>
-
         <item name="colorOnPrimary">@color/mi_magenta_on_color</item>
-
         <item name="colorSecondary">@color/mi_magenta</item>
         <item name="colorOnSecondary">@color/mi_magenta_on_color</item>
-
         <item name="android:colorBackground">@color/white</item>
-
     </style>
 
     <style name="Theme.Tarea1" parent="Base.Theme.Tarea1" />
+
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splashscreen</item>
+
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+
+        <item name="postSplashScreenTheme">@style/Base.Theme.Tarea1</item>
+    </style>
+
 </resources>

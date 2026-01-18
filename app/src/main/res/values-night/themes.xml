@@ -1,4 +1,13 @@
 <resources>
     <style name="Base.Theme.Tarea1" parent="Theme.Material3.DayNight.NoActionBar">
     </style>
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+
+        <item name="windowSplashScreenBackground">@color/black</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splashscreen</item>
+
+        <item name="postSplashScreenTheme">@style/Base.Theme.Tarea1</item>
+
+    </style>
 </resources>
