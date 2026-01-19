@@ -45,4 +45,17 @@
         android:name="com.example.tarea1.fragments.TabFragment"
         android:label="@string/title_tabs" tools:layout="@layout/fragment_tab" />
 
+    <fragment
+        android:id="@+id/contactFragment"
+        android:name="com.example.tarea1.fragments.ContactFragment"
+        android:label="@string/contact"
+        tools:layout="@layout/fragment_contact" />
+
+    <fragment
+        android:id="@+id/preferencesFragment"
+        android:name="com.example.tarea1.fragments.PreferencesFragment"
+        android:label="@string/preferences"
+        tools:layout="@layout/fragment_preferences" />
+
+
 </navigation>

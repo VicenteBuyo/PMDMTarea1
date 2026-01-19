@@ -24,4 +24,26 @@
     <string name="title_favs">Favorites</string>
     <string name="placeholder_keyboard_name">Keyboard Name</string>
     <string name="placeholder_keyboard_description">Description of a mechanical keyboard. Mechanical keyboards typically have many features, but the important thing is to recognize what they include. They usually all have switches, stabilizers, keycaps, and, above all, a good case.</string>
+    <string name="contact">Contact</string>
+    <string name="preferences">Preferences</string>
+    <string name="lista">List</string>
+    <string name="logout">Log out</string>
+    <string name="search">Search</string>
+    <string name="sort">Sort</string>
+    <string name="search_by_name">Search by name</string>
+    <string name="contact_call">Call</string>
+    <string name="contact_whatsapp">WhatsApp</string>
+    <string name="contact_email">Email</string>
+    <string name="prefs_language">Language (ES/EN)</string>
+    <string name="prefs_theme">Dark theme</string>
+    <string name="prefs_notifications">Notifications</string>
+    <string name="user_name">User</string>
+    <string name="user_image">User image</string>
+    <string name="app_image">Embedded image</string>
+    <string name="add_item">Add item</string>
+
+
+
+
+
 </resources>

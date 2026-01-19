@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="32dp">
+
+    <!-- Imagen: misma posición y tamaño que en LoginFragment -->
+    <ImageView
+        android:id="@+id/ivPrefsImage"
+        android:layout_width="0dp"
+        android:layout_height="160dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/app_image"
+        android:src="@drawable/splashscreen"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Switch 1: Idioma -->
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/switchLanguage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/prefs_language"
+        app:layout_constraintTop_toBottomOf="@id/ivPrefsImage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
+
+    <!-- Switch 2: Tema -->
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/switchTheme"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/prefs_theme"
+        app:layout_constraintTop_toBottomOf="@id/switchLanguage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <!-- Switch 3: Notificaciones -->
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/switchNotifications"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/prefs_notifications"
+        app:layout_constraintTop_toBottomOf="@id/switchTheme"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

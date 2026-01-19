@@ -1,17 +1,21 @@
 package com.example.tarea1.fragments
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.tarea1.databinding.FragmentListBinding
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.tarea1.R
+import com.example.tarea1.databinding.FragmentListBinding
+import com.example.tarea1.recycler.Keyboard
 import com.example.tarea1.recycler.KeyboardAdapter
 import com.example.tarea1.viewmodels.ListViewModel
-import android.media.MediaPlayer // Para reproducir sonidos
-import androidx.fragment.app.activityViewModels // Para compartir el ViewModel.
-import com.example.tarea1.R // Para acceder a IDs de recursos
+import java.util.Collections
+import java.util.Locale
 
 // Este Fragment es la VISTA principal que muestra la lista completa de teclados.
 class ListFragment : Fragment() {
@@ -20,34 +24,35 @@ class ListFragment : Fragment() {
     // 1. View Binding y Acceso al ViewModel
     // ----------------------------------------------------------------------
 
-    // Variable mutable (null al inicio) para mantener la referencia al layout inflado.
     private var _binding: FragmentListBinding? = null
-    // Getter solo para lectura
     private val binding get() = _binding!!
 
-    // Usamos 'activityViewModels()' para obtener una ÚNICA instancia del ListViewModel.
-    // Esto es vital porque esta instancia será COMPARTIDA con FavFragment, asegurando que ambos
-    // trabajen con la MISMA lista de datos y estados (ej: el estado 'fav').
-    private val viewModel: ListViewModel by activityViewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private lateinit var viewModel: ListViewModel
 
     // ----------------------------------------------------------------------
-    // 2. Creación de la Vista (Layout XML)
+    // 1.1 Estado de filtro/orden (lo que nos llega desde la toolbar)
     // ----------------------------------------------------------------------
+
+    // Guardamos el texto actual de búsqueda para poder aplicarlo siempre que cambie la lista
+    private var filtroActual: String = ""
+
+    // Guardamos el estado de orden (asc/desc) para aplicarlo igual
+    private var ordenAscendente: Boolean = true
+
+    // Guardamos la última lista completa que nos da el ViewModel
+    private var ultimaLista: List<Keyboard> = emptyList()
+
+    // Adapter
+    private lateinit var keyboardAdapter: KeyboardAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflamos el layout usando View Binding.
+    ): View {
         _binding = FragmentListBinding.inflate(inflater, container, false)
-        return binding.root // Devolvemos la vista raíz del layout inflado.
+        return binding.root
     }
-
 
     // ----------------------------------------------------------------------
     // 3. La Vista ha sido Creada (Configuración de Lógica)
@@ -56,80 +61,126 @@ class ListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ----------------------------------------------------------------------
-        // 3.1 Inicialización del Adapter y Configuración del RecyclerView
-        // ----------------------------------------------------------------------
+        // 1) Cogemos el ViewModel de la Activity para compartirlo con FavFragment
+        viewModel = ViewModelProvider(requireActivity())[ListViewModel::class.java]
 
-        val keyboardAdapter = KeyboardAdapter(
-            keyboardList = emptyList(), // Inicializamos con una lista vacía; los datos vendrán del LiveData.
-
-            // LISTENER: Define la acción que el Adapter debe DELEGAR.
-            onFavoriteClick = { keyboardTitle ->
-                // La VISTA (Fragment) le pide al VIEWMODEL que ejecute la lógica de negocio.
-                // El ViewModel se encargará de cambiar el estado interno del dato.
-                viewModel.toggleFavorite(keyboardTitle)
+        // 2) Creamos el adapter: usando interfaz
+        keyboardAdapter = KeyboardAdapter(
+            emptyList(),
+            object : KeyboardAdapter.OnFavoriteClickListener {
+                override fun onFavoriteClick(keyboardTitle: String) {
+                    // La VISTA le pide al ViewModel que cambie el favorito
+                    viewModel.toggleFavorite(keyboardTitle)
+                }
             },
-
-            // Indicamos que NO estamos en la vista de favoritos, por lo que el botón
-            // de estrella en el ítem DEBE estar activo y visible para poder añadir favoritos.
-            isFavView = false
+            false
         )
 
-        // Configuración del RecyclerView:
-        binding.rv.adapter = keyboardAdapter // Asignamos el puente (Adapter) a la lista.
-        // Le decimos al RecyclerView que organice los ítems en una lista vertical.
+        // 3) RecyclerView
+        binding.rv.adapter = keyboardAdapter
         binding.rv.layoutManager = LinearLayoutManager(context)
 
         // ----------------------------------------------------------------------
-        // 3.2 Observación del LiveData
+        // 3.2 Recibimos eventos de la toolbar (búsqueda y orden
         // ----------------------------------------------------------------------
 
-        // 2.1 Observación de la lista de teclados:
-        // 'observe()' es el observador. Cuando el ViewModel publica una lista actualizada,
-        // automáticamente se llama a la función lambda
-        viewModel.keyboardList.observe(viewLifecycleOwner) { updatedList ->
-            // Le pasamos la lista más reciente al Adapter para que redibuje el RecyclerView.
-            keyboardAdapter.submitList(updatedList)
+        // Listener del filtro (texto de búsqueda)
+        parentFragmentManager.setFragmentResultListener(
+            "filter_request",
+            viewLifecycleOwner
+        ) { _, bundle ->
+            filtroActual = bundle.getString("query", "")
+            aplicarFiltroYOrden()
         }
 
-        // Observación del evento de audio
-        // Observamos un LiveData de "evento". Cuando se dispara
-        // llamamos a la función que maneja el efecto visual/auditivo.
-        viewModel.playAudioEvent.observe(viewLifecycleOwner) {
-            playFavoriteSound() // La VISTA maneja el audio
+        // Listener del orden (asc/desc)
+        parentFragmentManager.setFragmentResultListener(
+            "sort_request",
+            viewLifecycleOwner
+        ) { _, bundle ->
+            ordenAscendente = bundle.getBoolean("asc", true)
+            aplicarFiltroYOrden()
         }
+
+        // ----------------------------------------------------------------------
+        // 3.3 Observación del LiveData
+        // ----------------------------------------------------------------------
+
+        viewModel.keyboardList.observe(viewLifecycleOwner, Observer { updatedList ->
+            // Guardamos la lista completa y repintamos con filtro/orden aplicados
+            ultimaLista = updatedList
+            aplicarFiltroYOrden()
+        })
+
+        viewModel.playAudioEvent.observe(viewLifecycleOwner, Observer {
+            playFavoriteSound()
+        })
     }
 
     // ----------------------------------------------------------------------
-    // 4. Lógica de Reproducción de Audio (Efecto Secundario)
+    // 3.4 Aplicar filtro y orden antes de pintar el RecyclerView
+    // ----------------------------------------------------------------------
+
+    private fun aplicarFiltroYOrden() {
+
+        // 1) Partimos de lista completa
+        val listaProcesada = ArrayList<Keyboard>()
+
+        // 2) Filtrado
+        if (filtroActual.trim().isEmpty()) {
+            listaProcesada.addAll(ultimaLista)
+        } else {
+            val query = filtroActual.trim().lowercase(Locale.getDefault())
+            for (k in ultimaLista) {
+                val titulo = k.title.lowercase(Locale.getDefault())
+                if (titulo.contains(query)) {
+                    listaProcesada.add(k)
+                }
+            }
+        }
+
+        // 3) Orden
+        Collections.sort(listaProcesada, object : Comparator<Keyboard> {
+            override fun compare(o1: Keyboard, o2: Keyboard): Int {
+                return if (ordenAscendente) {
+                    o1.title.compareTo(o2.title, ignoreCase = true)
+                } else {
+                    o2.title.compareTo(o1.title, ignoreCase = true)
+                }
+            }
+        })
+
+        // 4) Pintamos en el adapter
+        keyboardAdapter.submitList(listaProcesada)
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. Lógica de Reproducción de Audio
     // ----------------------------------------------------------------------
 
     private fun playFavoriteSound() {
-        // LLAMADA SEGURA:
-        // Usamos 'context?' para asegurar que el Fragment está anclado a un Activity.
-        // ? : si es null sale del méto do y evita crash.
-        // .let si no, ejecuta
-        context?.let {
-            // MediaPlayer.create() carga el recurso de sonido desde 'res/raw'.
-            val mediaPlayer = MediaPlayer.create(it, R.raw.favorite_toggle)
+        val ctx = context
+        if (ctx != null) {
+            val mediaPlayer = MediaPlayer.create(ctx, R.raw.favorite_toggle)
+            if (mediaPlayer != null) {
+                mediaPlayer.start()
 
-            // Inicia la reproducción del sonido.
-            mediaPlayer?.start()
-
-            // ELe decimos al sistema que libere los recursos
-            // del MediaPlayer una vez que el audio termine de reproducirse.
-            mediaPlayer?.setOnCompletionListener { mp -> mp.release() }
+                // Sin lambda: listener clásico
+                mediaPlayer.setOnCompletionListener(object : MediaPlayer.OnCompletionListener {
+                    override fun onCompletion(mp: MediaPlayer?) {
+                        mp?.release()
+                    }
+                })
+            }
         }
     }
 
-
     // ----------------------------------------------------------------------
-    // 5. Limpieza (Buena práctica)
+    // 5. Limpieza
     // ----------------------------------------------------------------------
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
 }

@@ -18,11 +18,15 @@ class KeyboardAdapter (
 
     // La función que la VISTA (Adapter) llama al VIEWMODEL para pedir un cambio.
     // Recibe un String (el título del teclado) y no devuelve nada (Unit).
-    private val onFavoriteClick: (String) -> Unit,
+    private val onFavoriteClick: OnFavoriteClickListener,
 
     // El Interruptor Lógico: Nos dice si estamos en la vista de Favoritos (true) o en la Lista Principal (false).
     private val isFavView: Boolean = false
 ) : RecyclerView.Adapter<KeyboardAdapter.KeyboardViewHolder>() { // Hereda de RecyclerView.Adapter, obligándonos a implementar 3 métodos.
+
+    interface OnFavoriteClickListener {
+        fun onFavoriteClick(keyboardTitle: String)
+    }
 
     // ----------------------------------------------------------------------
     // 2. FUNCIÓN submitList (Actualización de la Lista)
@@ -34,7 +38,6 @@ class KeyboardAdapter (
         notifyDataSetChanged() // Le dice al RecyclerView que se redibuje por completo porque hay cambios
     }
 
-    // Métodos obligatorios del Adapter
 
     // 1. onCreateViewHolder: Se llama cuando el RecyclerView necesita crear una NUEVA fila visible
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KeyboardViewHolder {
@@ -86,7 +89,7 @@ class KeyboardAdapter (
                 // 3. LÓGICA DE FAVORITO: Asignamos la acción de 'quitar favorito' al clic en TODA la fila (binding.cl).
                 // Al pulsar el ítem, se llama al callback para que el ViewModel cambie 'fav' a false.
                 binding.cl.setOnClickListener {
-                    onFavoriteClick(keyboard.title) // Esto QUITA el teclado de la lista de favoritos.
+                    onFavoriteClick.onFavoriteClick(keyboard.title) // Esto QUITA el teclado de la lista de favoritos.
                 }
             } else {
                 // ESTAMOS EN LISTFRAGMENT: El botón de estrella está ACTIVO.
@@ -97,12 +100,11 @@ class KeyboardAdapter (
                 // 4.  botón de favorito activo
                 binding.ivFavorito.setOnClickListener {
                     // Si pulso la estrella, llamo al callback para que el ViewModel ALTERNE el estado.
-                    onFavoriteClick(keyboard.title)
+                    onFavoriteClick.onFavoriteClick(keyboard.title)
                 }
 
                 // En ListFragment, el clic en la fila completa solo se usa para navegar.
                 binding.cl.setOnClickListener {
-                    //TODO: Implementar lógica de navegación o detalle, más adelante si se pide
                 }
             }
         }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/tabFragment"
+        android:icon="@drawable/ic_lista"
+        android:title="@string/lista" />
+
+    <item
+        android:id="@+id/contactFragment"
+        android:icon="@drawable/ic_contacto"
+        android:title="@string/contact" />
+
+    <item
+        android:id="@+id/preferencesFragment"
+        android:icon="@drawable/ic_preferencias"
+        android:title="@string/preferences" />
+
+    <item
+        android:id="@+id/action_logout"
+        android:icon="@drawable/ic_logout"
+        android:title="@string/logout" />
+
+</menu>

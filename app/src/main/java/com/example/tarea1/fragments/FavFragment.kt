@@ -50,18 +50,15 @@ class FavFragment : Fragment() {
 
         // 1. Inicialización del Adapter
         val keyboardAdapter = KeyboardAdapter(
-            // Inicializamos la lista vacía, ya que el LiveData, observer, taerá los datos reales
             keyboardList = emptyList(),
-            // LISTENER: Cuando el usuario toque la estrella,
-            // se llamará a esta función, que a su vez llama a toggleFavorite() en el ViewModel.
-            onFavoriteClick = { keyboardTitle ->
-                viewModel.toggleFavorite(keyboardTitle)
+            onFavoriteClick = object : KeyboardAdapter.OnFavoriteClickListener {
+                override fun onFavoriteClick(keyboardTitle: String) {
+                    viewModel.toggleFavorite(keyboardTitle)
+                }
             },
-
-            // Esto hace que el KeyboardAdapter oculte o deshabilite el icono de estrella,
-            // ya que ya estamos en la lista de favoritos.
             isFavView = true
         )
+
 
         // Configuración del RecyclerView: Le decimos qué adaptador usar y cómo organizar la lista (verticalmente).
         binding.rvFavs.adapter = keyboardAdapter
