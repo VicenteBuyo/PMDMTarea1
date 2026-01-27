@@ -18,19 +18,16 @@ import com.example.tarea1.databinding.FragmentRegisterBinding // Clase generada 
 import com.example.tarea1.viewmodels.NewUserViewModel // Tu lógica de negocio específica para registro.
 import java.util.Calendar // Utilidad de Java para manejar fechas y horas.
 
-// Definición de la clase RegisterFragment que hereda de Fragment.
-// Actúa como el controlador de la vista "Crear Cuenta".
 class RegisterFragment : Fragment() {
 
-    // --- VIEW BINDING (Vinculación de Vistas) ---
+    // --- VIEW BINDING  ---
     // Variable mutable privada para almacenar la referencia al diseño (binding).
     // Es nullable (?) porque el binding solo existe mientras la vista está viva.
     private var _binding: FragmentRegisterBinding? = null
 
-    // Propiedad de acceso público (solo lectura).
+    // Propiedad de solo lectura
     // Usa 'get() = _binding!!' para asegurar que no es nulo cuando lo llamamos.
-    // Si lo llamáramos cuando la vista está destruida, la app se cerraría (crash),
-    // pero lo gestionamos correctamente en onDestroyView.
+    // Si lo llamáramos cuando la vista está destruida, la app se cerraría,
     private val binding get() = _binding!!
 
     // --- VIEWMODEL (Lógica de Negocio) ---
