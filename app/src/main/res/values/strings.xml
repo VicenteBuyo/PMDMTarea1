@@ -17,9 +17,15 @@
     <string name="btn_crear_cuenta">Crear Cuenta</string>
     <string name="error_contrasenas_no_coinciden">Las contraseñas no coinciden</string>
     <string name="error_campo_obligatorio">Campo obligatorio</string>
-    <string name="error_contrasena_minima">La contraseña debe tener al menos 4 caracteres</string>
-    <string name='mensaje_login_exitoso'>Login Correcto. ¡Bienvenido, admin!</string>
+    <string name="error_contrasena_minima">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_email_ya_registrado">Ya existe un usuario con ese correo</string>
+    <string name="error_registro_generico">Error al crear la cuenta</string>
+    <string name="error_load_keyboards">Error al cargar los teclados</string>
+    <string name="error_add_keyboard">Error al añadir el teclado</string>
+    <string name="error_update_favorite">Error al actualizar favorito</string>
+    <string name='mensaje_login_exitoso'>Login correcto</string>
     <string name='mensaje_credenciales_incorrectas'>Credenciales Incorrectas</string>
+    <string name="mensaje_cuenta_creada">Cuenta creada con éxito</string>
     <string name="title_tabs">Teclados y Favoritos</string>
     <string name="title_list">Lista de Teclados</string>
     <string name="title_favs">Favoritos</string>
@@ -35,6 +41,10 @@
     <string name="contact_call">Llamar</string>
     <string name="contact_whatsapp">WhatsApp</string>
     <string name="contact_email">Email</string>
+    <string name="contact_phone_number">+34123456789</string>
+    <string name="contact_whatsapp_url">https://wa.me/34123456789</string>
+    <string name="contact_email_address">info@keyboardguide.com</string>
+    <string name="contact_email_subject">Consulta desde la app</string>
     <string name="prefs_language">Idioma (ES/EN)</string>
     <string name="prefs_theme">Tema oscuro</string>
     <string name="prefs_notifications">Notificaciones</string>
@@ -42,6 +52,19 @@
     <string name="user_image">Imagen de usuario</string>
     <string name="app_image">Imagen de la app</string>
     <string name="add_item">Añadir elemento</string>
+    <string name="dialog_add_title">Añadir teclado</string>
+    <string name="dialog_add_button">Añadir teclado</string>
+    <string name="dialog_cancel_button">Cancelar</string>
+    <string name="dialog_hint_title">Título</string>
+    <string name="dialog_hint_description">Descripción</string>
+    <string name="dialog_label_favorite">Favorito</string>
+    <string name="dialog_error_title_required">El título es obligatorio</string>
+    <string name="dialog_error_description_required">La descripción es obligatoria</string>
+    <string name="btn_recuperar_password">Recuperar contraseña</string>
+    <string name="msg_reset_password_sent">Email de recuperación enviado</string>
+    <string name="msg_reset_password_empty_email">Escribe el correo antes de recuperar contraseña</string>
+    <string name="msg_reset_password_failed">No se pudo enviar el email de recuperación</string>
+    <string name="loading_keyboards">Cargando teclados</string>
 
 
 

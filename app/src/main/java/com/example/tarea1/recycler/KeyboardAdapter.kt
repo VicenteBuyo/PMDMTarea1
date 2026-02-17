@@ -1,122 +1,93 @@
 package com.example.tarea1.recycler
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.view.View // Necesario para controlar la visibilidad (View.VISIBLE)
-import androidx.recyclerview.widget.RecyclerView // La clase base de la que heredamos
-import com.example.tarea1.R // Para acceder a los recursos
-import com.example.tarea1.databinding.ItemLayoutBinding // El binding para acceder a los elementos de cada fila
+import androidx.recyclerview.widget.RecyclerView
+import com.example.tarea1.R
+import com.example.tarea1.databinding.ItemLayoutBinding
+import com.example.tarea1.models.Keyboard
 
-// ----------------------------------------------------------------------
-// 1. CONSTRUCTOR
-// ----------------------------------------------------------------------
-
-// Un Adapter actúa como un CONTRATO entre los datos y la lista visible.
-class KeyboardAdapter (
-    // Los Datos: La lista que vamos a dibujar. Es 'private var' para poder actualizarla después.
+// Adapter del RecyclerView de teclados.
+class KeyboardAdapter(
     private var keyboardList: List<Keyboard>,
-
-    // La función que la VISTA (Adapter) llama al VIEWMODEL para pedir un cambio.
-    // Recibe un String (el título del teclado) y no devuelve nada (Unit).
     private val onFavoriteClick: OnFavoriteClickListener,
-
-    // El Interruptor Lógico: Nos dice si estamos en la vista de Favoritos (true) o en la Lista Principal (false).
     private val isFavView: Boolean = false
-) : RecyclerView.Adapter<KeyboardAdapter.KeyboardViewHolder>() { // Hereda de RecyclerView.Adapter, obligándonos a implementar 3 métodos.
+) : RecyclerView.Adapter<KeyboardAdapter.KeyboardViewHolder>() {
 
+    // Callback para notificar click en estrella al Fragment.
     interface OnFavoriteClickListener {
-        fun onFavoriteClick(keyboardTitle: String)
+        fun onFavoriteClick(keyboardId: String)
     }
 
-    // ----------------------------------------------------------------------
-    // 2. FUNCIÓN submitList (Actualización de la Lista)
-    // ----------------------------------------------------------------------
-
-    // Permite que el LiveData del ViewModel envíe una nueva lista filtrada o actualizada.
+    // Reemplaza la lista en memoria y repinta.
     fun submitList(newList: List<Keyboard>) {
-        this.keyboardList = newList // Reemplazo la lista vieja por la nueva.
-        notifyDataSetChanged() // Le dice al RecyclerView que se redibuje por completo porque hay cambios
+        keyboardList = newList
+        notifyDataSetChanged()
     }
 
-
-    // 1. onCreateViewHolder: Se llama cuando el RecyclerView necesita crear una NUEVA fila visible
+    // Crea un ViewHolder nuevo inflando item_layout.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KeyboardViewHolder {
-        // Inflamos el layout 'item_layout.xml' usando View Binding.
         val binding = ItemLayoutBinding.inflate(
-            LayoutInflater.from(parent.context), // Usamos el Context para saber qué inflater usar, quien es su parent
+            LayoutInflater.from(parent.context),
             parent,
-            false // NO adjuntar a la raíz inmediatamente.
+            false
         )
-        return KeyboardViewHolder(binding) // Devolvemos nuestro contenedor de la fila.
+        return KeyboardViewHolder(binding)
     }
 
-    // 2. onBindViewHolder: Se llama cada vez que una fila DEBE MOSTRAR nuevos datos
+    // Enlaza datos del teclado con la fila.
     override fun onBindViewHolder(holder: KeyboardViewHolder, position: Int) {
-        val keyboard = keyboardList[position] // Obtengo el objeto Keyboard en la posición actual.
-        holder.bind(keyboard) // Le paso ese objeto a mi ViewHolder para que dibuje el contenido.
+        holder.bind(keyboardList[position])
     }
 
-    // 3. getItemCount: Le dice al RecyclerView cuántos ítems tiene que dibujar.
+    // Total de filas.
     override fun getItemCount(): Int = keyboardList.size
 
-    // ----------------------------------------------------------------------
-    // 3. VIEWHOLDER
-    // ----------------------------------------------------------------------
-
-    // El ViewHolder: Contiene las referencias a los elementos de UNA sola fila y la lógica para llenarlos.
     inner class KeyboardViewHolder(private val binding: ItemLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        // Pinta una fila y configura su comportamiento.
         fun bind(keyboard: Keyboard) {
-            // Llenado de datos
             binding.tvTeclado.text = keyboard.title
             binding.tvDescripcion.text = keyboard.description
-            binding.ivTeclado.setImageResource(keyboard.imagenId)
-
-            // El icono de favorito SIEMPRE es visible: Se asegura de que la estrella esté en el layout.
+            binding.ivTeclado.setImageResource(resolveKeyboardImage(keyboard.title))
             binding.ivFavorito.visibility = View.VISIBLE
 
-            // (El Interruptor isFavView)
+            updateFavoriteIcon(keyboard.fav)
+
+            // En favoritos dejo la estrella bloqueada para no desmarcar desde ahí.
+            binding.ivFavorito.alpha = if (isFavView) 0.85f else 1f
             if (isFavView) {
-                // ESTAMOS EN FAVFRAGMENT: El botón de estrella está deshabilitado.
-
-                // 1. Deshabilitar visualmente: Se ve gris para indicar que no se puede interactuar.
-                binding.ivFavorito.alpha = 0.5f
-
-                // 2. QUITAR EL LISTENER: Ponerlo a 'null' deshabilita el clic en la estrella.
                 binding.ivFavorito.setOnClickListener(null)
-
-                // 3. LÓGICA DE FAVORITO: Asignamos la acción de 'quitar favorito' al clic en TODA la fila (binding.cl).
-                // Al pulsar el ítem, se llama al callback para que el ViewModel cambie 'fav' a false.
-                binding.cl.setOnClickListener {
-                    onFavoriteClick.onFavoriteClick(keyboard.title) // Esto QUITA el teclado de la lista de favoritos.
-                }
+                binding.cl.setOnClickListener(null)
             } else {
-                // ESTAMOS EN LISTFRAGMENT: El botón de estrella está ACTIVO.
-
-                binding.ivFavorito.alpha = 1.0f // Opacidad normal (activo)
-                updateFavoriteIcon(keyboard.fav) // Usa la función de abajo para mostrar la estrella llena o vacía.
-
-                // 4.  botón de favorito activo
                 binding.ivFavorito.setOnClickListener {
-                    // Si pulso la estrella, llamo al callback para que el ViewModel ALTERNE el estado.
-                    onFavoriteClick.onFavoriteClick(keyboard.title)
+                    onFavoriteClick.onFavoriteClick(keyboard.id)
                 }
-
-                // En ListFragment, el clic en la fila completa solo se usa para navegar.
-                binding.cl.setOnClickListener {
-                }
+                binding.cl.setOnClickListener(null)
             }
         }
 
-        // Función auxiliar que cambia el icono de la estrella
-        private fun updateFavoriteIcon(isFavorite: Boolean){
+        // Cambia icono según si está marcado o no.
+        private fun updateFavoriteIcon(isFavorite: Boolean) {
             binding.ivFavorito.setImageResource(
-                // Si 'isFavorite' es true, usa mi imagen 'star_on'.
-                if (isFavorite) R.drawable.star_on
-                // Si es false, usa el icono de estrella vacía por defecto de Android.
-                else android.R.drawable.star_off
+                if (isFavorite) R.drawable.star_on else R.drawable.star_off
             )
+        }
+
+        // Traduce el título a una imagen local del drawable.
+        private fun resolveKeyboardImage(title: String): Int {
+            val normalized = title.lowercase()
+            return when {
+                normalized.contains("gmmk") -> R.drawable.gmmkpro75
+                normalized.contains("keychron") -> R.drawable.keychronq1pro75
+                normalized.contains("nuphy") -> R.drawable.nuphyair75v2
+                normalized.contains("akko") -> R.drawable.akko3098b
+                normalized.contains("monsgeek") -> R.drawable.monsgeekm1w
+                normalized.contains("higround") -> R.drawable.higroundbasecamp65
+                else -> R.drawable.splashscreen
+            }
         }
     }
 }

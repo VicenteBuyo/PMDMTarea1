@@ -11,12 +11,13 @@ import androidx.fragment.app.Fragment
 import com.example.tarea1.R
 import com.example.tarea1.databinding.FragmentContactBinding
 
+// Pantalla de contacto: vídeo + accesos rápidos a llamada/whatsapp/email.
 class ContactFragment : Fragment() {
 
-    // Binding para acceder a los elementos del XML
     private var _binding: FragmentContactBinding? = null
     private val binding get() = _binding!!
 
+    // Infla vista de contacto.
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -26,60 +27,50 @@ class ContactFragment : Fragment() {
         return binding.root
     }
 
+    // Configuro vídeo y botones al crear la vista.
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ---------------------------------------------------------
-        // VIDEO
-        // ---------------------------------------------------------
+        setupVideo()
+        setupActions()
+    }
 
-        // Creamos el mediacontroller
+    // Monta reproducción del vídeo local de res/raw.
+    private fun setupVideo() {
         val mediaController = MediaController(requireContext())
         mediaController.setAnchorView(binding.videoView)
-
-        // Asociamos el mediacontroller al VideoView
         binding.videoView.setMediaController(mediaController)
 
-        // Ruta del vídeo desde res/raw
         val rutaVideo = "android.resource://${requireContext().packageName}/${R.raw.video}"
         binding.videoView.setVideoPath(rutaVideo)
-
-        // Arrancamos el vídeo automáticamente
         binding.videoView.start()
+    }
 
-        // ---------------------------------------------------------
-        // BOTÓN LLAMAR
-        // ---------------------------------------------------------
+    // Asigna acciones a los tres botones de contacto.
+    private fun setupActions() {
         binding.btnCall.setOnClickListener {
             val intent = Intent(Intent.ACTION_DIAL)
-            intent.data = Uri.parse("tel:+34123456789")
+            intent.data = Uri.parse("tel:${getString(R.string.contact_phone_number)}")
             startActivity(intent)
         }
 
-        // ---------------------------------------------------------
-        // BOTÓN WHATSAPP
-        // ---------------------------------------------------------
         binding.btnWhatsApp.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse("https://wa.me/34123456789")
+            intent.data = Uri.parse(getString(R.string.contact_whatsapp_url))
             startActivity(intent)
         }
 
-        // ---------------------------------------------------------
-        // BOTÓN EMAIL
-        // ---------------------------------------------------------
         binding.btnEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO)
-            intent.data = Uri.parse("mailto:info@lalibreria.com")
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Consulta desde la app")
+            intent.data = Uri.parse("mailto:${getString(R.string.contact_email_address)}")
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.contact_email_subject))
             startActivity(intent)
         }
     }
 
+    // Limpia recursos de vídeo y binding al destruir vista.
     override fun onDestroyView() {
         super.onDestroyView()
-
-        // Paramos el vídeo para evitar fugas de memoria
         binding.videoView.stopPlayback()
         _binding = null
     }

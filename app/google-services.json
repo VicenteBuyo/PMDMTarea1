@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "201097884827",
+    "project_id": "pmdm---keyboardguide",
+    "storage_bucket": "pmdm---keyboardguide.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:201097884827:android:4a237a85601b69b898023e",
+        "android_client_info": {
+          "package_name": "com.example.tarea1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb75_QMdXgqs_2QU1rARsyegm_YMeez_U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

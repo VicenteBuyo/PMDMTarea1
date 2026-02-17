@@ -5,45 +5,39 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tarea1.R
+import com.example.tarea1.alertdialog.AddKeyboardDialog
 import com.example.tarea1.databinding.FragmentListBinding
-import com.example.tarea1.recycler.Keyboard
+import com.example.tarea1.models.Keyboard
 import com.example.tarea1.recycler.KeyboardAdapter
 import com.example.tarea1.viewmodels.ListViewModel
-import java.util.Collections
-import java.util.Locale
+import kotlinx.coroutines.launch
 
-// Este Fragment es la VISTA principal que muestra la lista completa de teclados.
 class ListFragment : Fragment() {
-
-    // ----------------------------------------------------------------------
-    // 1. View Binding y Acceso al ViewModel
-    // ----------------------------------------------------------------------
 
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: ListViewModel
+    // Comparto VM con FavFragment para que ambos vean la misma lista en tiempo real.
+    private val viewModel: ListViewModel by activityViewModels()
 
-    // ----------------------------------------------------------------------
-    // 1.1 Estado de filtro/orden (lo que nos llega desde la toolbar)
-    // ----------------------------------------------------------------------
-
-    // Guardamos el texto actual de búsqueda para poder aplicarlo siempre que cambie la lista
-    private var filtroActual: String = ""
-
-    // Guardamos el estado de orden (asc/desc) para aplicarlo igual
-    private var ordenAscendente: Boolean = true
-
-    // Guardamos la última lista completa que nos da el ViewModel
-    private var ultimaLista: List<Keyboard> = emptyList()
-
-    // Adapter
     private lateinit var keyboardAdapter: KeyboardAdapter
+
+    // Estado local de filtros de esta pestaña.
+    private var currentQuery: String = ""
+    private var sortAsc: Boolean = true
+
+    private companion object {
+        const val FILTER_REQUEST_LIST = "filter_request_list"
+        const val SORT_REQUEST_LIST = "sort_request_list"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,130 +48,126 @@ class ListFragment : Fragment() {
         return binding.root
     }
 
-    // ----------------------------------------------------------------------
-    // 3. La Vista ha sido Creada (Configuración de Lógica)
-    // ----------------------------------------------------------------------
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1) Cogemos el ViewModel de la Activity para compartirlo con FavFragment
-        viewModel = ViewModelProvider(requireActivity())[ListViewModel::class.java]
+        setupRecycler()
+        setupFragmentResults()
+        setupCollectors()
 
-        // 2) Creamos el adapter: usando interfaz
+        // Recargo al entrar para traer datos frescos del usuario logueado.
+        viewModel.refreshKeyboards()
+    }
+
+    private fun setupRecycler() {
         keyboardAdapter = KeyboardAdapter(
-            emptyList(),
-            object : KeyboardAdapter.OnFavoriteClickListener {
-                override fun onFavoriteClick(keyboardTitle: String) {
-                    // La VISTA le pide al ViewModel que cambie el favorito
-                    viewModel.toggleFavorite(keyboardTitle)
+            keyboardList = emptyList(),
+            onFavoriteClick = object : KeyboardAdapter.OnFavoriteClickListener {
+                override fun onFavoriteClick(keyboardId: String) {
+                    // Cambio fav y se persiste en Firestore.
+                    viewModel.toggleFavorite(keyboardId)
                 }
             },
-            false
+            isFavView = false
         )
 
-        // 3) RecyclerView
         binding.rv.adapter = keyboardAdapter
         binding.rv.layoutManager = LinearLayoutManager(context)
-
-        // ----------------------------------------------------------------------
-        // 3.2 Recibimos eventos de la toolbar (búsqueda y orden
-        // ----------------------------------------------------------------------
-
-        // Listener del filtro (texto de búsqueda)
-        parentFragmentManager.setFragmentResultListener(
-            "filter_request",
-            viewLifecycleOwner
-        ) { _, bundle ->
-            filtroActual = bundle.getString("query", "")
-            aplicarFiltroYOrden()
-        }
-
-        // Listener del orden (asc/desc)
-        parentFragmentManager.setFragmentResultListener(
-            "sort_request",
-            viewLifecycleOwner
-        ) { _, bundle ->
-            ordenAscendente = bundle.getBoolean("asc", true)
-            aplicarFiltroYOrden()
-        }
-
-        // ----------------------------------------------------------------------
-        // 3.3 Observación del LiveData
-        // ----------------------------------------------------------------------
-
-        viewModel.keyboardList.observe(viewLifecycleOwner, Observer { updatedList ->
-            // Guardamos la lista completa y repintamos con filtro/orden aplicados
-            ultimaLista = updatedList
-            aplicarFiltroYOrden()
-        })
-
-        viewModel.playAudioEvent.observe(viewLifecycleOwner, Observer {
-            playFavoriteSound()
-        })
     }
 
-    // ----------------------------------------------------------------------
-    // 3.4 Aplicar filtro y orden antes de pintar el RecyclerView
-    // ----------------------------------------------------------------------
+    private fun setupFragmentResults() {
+        // Texto de búsqueda que llega desde toolbar.
+        parentFragmentManager.setFragmentResultListener(FILTER_REQUEST_LIST, viewLifecycleOwner) { _, bundle ->
+            currentQuery = bundle.getString("query").orEmpty()
+            renderList(viewModel.keyboardList.value)
+        }
 
-    private fun aplicarFiltroYOrden() {
+        // Orden asc/desc que llega desde toolbar.
+        parentFragmentManager.setFragmentResultListener(SORT_REQUEST_LIST, viewLifecycleOwner) { _, bundle ->
+            sortAsc = bundle.getBoolean("asc", true)
+            renderList(viewModel.keyboardList.value)
+        }
 
-        // 1) Partimos de lista completa
-        val listaProcesada = ArrayList<Keyboard>()
+        // Señal del FAB para abrir diálogo de alta.
+        parentFragmentManager.setFragmentResultListener("add_keyboard_request", viewLifecycleOwner) { _, _ ->
+            showAddKeyboardDialog()
+        }
+    }
 
-        // 2) Filtrado
-        if (filtroActual.trim().isEmpty()) {
-            listaProcesada.addAll(ultimaLista)
+    private fun setupCollectors() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    // Cuando cambia la lista en el VM, la vuelvo a pintar con filtros/orden.
+                    viewModel.keyboardList.collect { keyboards ->
+                        renderList(keyboards)
+                    }
+                }
+
+                launch {
+                    // Progress de carga mientras se consulta Firebase.
+                    viewModel.isLoading.collect { isLoading ->
+                        binding.pbLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
+                        binding.rv.visibility = if (isLoading) View.GONE else View.VISIBLE
+                    }
+                }
+
+                launch {
+                    // Sonido de favorito cada vez que toggle va bien.
+                    viewModel.playAudioEvent.collect {
+                        playFavoriteSound()
+                    }
+                }
+
+                launch {
+                    // Cualquier error lo paso a un mensaje sencillo.
+                    viewModel.errorEvent.collect { error ->
+                        val messageRes = when (error) {
+                            ListViewModel.ErrorType.Load -> R.string.error_load_keyboards
+                            ListViewModel.ErrorType.Add -> R.string.error_add_keyboard
+                            ListViewModel.ErrorType.UpdateFavorite -> R.string.error_update_favorite
+                        }
+                        Toast.makeText(requireContext(), getString(messageRes), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun renderList(fullList: List<Keyboard>) {
+        // Filtro por texto.
+        val filtered = if (currentQuery.isBlank()) {
+            fullList
         } else {
-            val query = filtroActual.trim().lowercase(Locale.getDefault())
-            for (k in ultimaLista) {
-                val titulo = k.title.lowercase(Locale.getDefault())
-                if (titulo.contains(query)) {
-                    listaProcesada.add(k)
-                }
-            }
+            fullList.filter { it.title.contains(currentQuery, ignoreCase = true) }
         }
 
-        // 3) Orden
-        Collections.sort(listaProcesada, object : Comparator<Keyboard> {
-            override fun compare(o1: Keyboard, o2: Keyboard): Int {
-                return if (ordenAscendente) {
-                    o1.title.compareTo(o2.title, ignoreCase = true)
-                } else {
-                    o2.title.compareTo(o1.title, ignoreCase = true)
-                }
-            }
-        })
+        // Orden por título.
+        val sorted = if (sortAsc) {
+            filtered.sortedBy { it.title.lowercase() }
+        } else {
+            filtered.sortedByDescending { it.title.lowercase() }
+        }
 
-        // 4) Pintamos en el adapter
-        keyboardAdapter.submitList(listaProcesada)
+        keyboardAdapter.submitList(sorted)
     }
 
-    // ----------------------------------------------------------------------
-    // 4. Lógica de Reproducción de Audio
-    // ----------------------------------------------------------------------
+    private fun showAddKeyboardDialog() {
+        AddKeyboardDialog.show(
+            context = requireContext(),
+            inflater = layoutInflater
+        ) { title, description, fav ->
+            // Alta de teclado nueva y refresco automático al terminar.
+            viewModel.addKeyboard(title = title, description = description, fav = fav)
+        }
+    }
 
     private fun playFavoriteSound() {
-        val ctx = context
-        if (ctx != null) {
-            val mediaPlayer = MediaPlayer.create(ctx, R.raw.favorite_toggle)
-            if (mediaPlayer != null) {
-                mediaPlayer.start()
-
-                // Sin lambda: listener clásico
-                mediaPlayer.setOnCompletionListener(object : MediaPlayer.OnCompletionListener {
-                    override fun onCompletion(mp: MediaPlayer?) {
-                        mp?.release()
-                    }
-                })
-            }
-        }
+        val mediaPlayer = MediaPlayer.create(requireContext(), R.raw.favorite_toggle)
+        mediaPlayer?.setOnCompletionListener { it.release() }
+        mediaPlayer?.start()
     }
-
-    // ----------------------------------------------------------------------
-    // 5. Limpieza
-    // ----------------------------------------------------------------------
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -16,9 +16,15 @@
     <string name="btn_crear_cuenta">Create Account</string>
     <string name="error_contrasenas_no_coinciden">Passwords don\'t match</string>
     <string name="error_campo_obligatorio">Mandatory field</string>
-    <string name="error_contrasena_minima">Password must be at least 4 characters</string>
-    <string name='mensaje_login_exitoso'>Login is Valid. ¡Welcome, admin!</string>
+    <string name="error_contrasena_minima">Password must be at least 6 characters</string>
+    <string name="error_email_ya_registrado">A user with that email already exists</string>
+    <string name="error_registro_generico">Could not create account</string>
+    <string name="error_load_keyboards">Could not load keyboards</string>
+    <string name="error_add_keyboard">Could not add keyboard</string>
+    <string name="error_update_favorite">Could not update favorite</string>
+    <string name='mensaje_login_exitoso'>Login successful</string>
     <string name='mensaje_credenciales_incorrectas'>Invalid Credentials</string>
+    <string name="mensaje_cuenta_creada">Account created successfully</string>
     <string name="title_tabs">Keyboards and Favorites</string>
     <string name="title_list">Keyboards list</string>
     <string name="title_favs">Favorites</string>
@@ -34,6 +40,10 @@
     <string name="contact_call">Call</string>
     <string name="contact_whatsapp">WhatsApp</string>
     <string name="contact_email">Email</string>
+    <string name="contact_phone_number">+34123456789</string>
+    <string name="contact_whatsapp_url">https://wa.me/34123456789</string>
+    <string name="contact_email_address">info@keyboardguide.com</string>
+    <string name="contact_email_subject">Request from the app</string>
     <string name="prefs_language">Language (ES/EN)</string>
     <string name="prefs_theme">Dark theme</string>
     <string name="prefs_notifications">Notifications</string>
@@ -41,6 +51,19 @@
     <string name="user_image">User image</string>
     <string name="app_image">Embedded image</string>
     <string name="add_item">Add item</string>
+    <string name="dialog_add_title">Add keyboard</string>
+    <string name="dialog_add_button">Add keyboard</string>
+    <string name="dialog_cancel_button">Cancel</string>
+    <string name="dialog_hint_title">Title</string>
+    <string name="dialog_hint_description">Description</string>
+    <string name="dialog_label_favorite">Favorite</string>
+    <string name="dialog_error_title_required">Title is required</string>
+    <string name="dialog_error_description_required">Description is required</string>
+    <string name="btn_recuperar_password">Reset password</string>
+    <string name="msg_reset_password_sent">Recovery email sent</string>
+    <string name="msg_reset_password_empty_email">Type your email before resetting password</string>
+    <string name="msg_reset_password_failed">Could not send recovery email</string>
+    <string name="loading_keyboards">Loading keyboards</string>
 
 
 

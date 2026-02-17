@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-}
+    alias(libs.plugins.google.services)}
 
 android {
     namespace = "com.example.tarea1"
@@ -91,4 +91,11 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.8.9")
     // Componente Splashscreen
     implementation("androidx.core:core-splashscreen:1.0.1")
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation("com.google.firebase:firebase-auth")
+    // Firebase Firestore
+    implementation("com.google.firebase:firebase-firestore")
+    // Corrutinas
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 }
